@@ -30,9 +30,20 @@ fn main() {
 
     // Next, fall back and try to use pkg-config if its available.
     match pkg_config::find_library("libcurl") {
-        Ok(..) => return,
-        Err(e) => println!("Couldn't find libcurl from \
-                           pkgconfig ({:?}), compiling it from source...", e),
+        Ok(..) => {
+            // Build with extra libs
+            // Set libs and link paths in env var
+            let linked_lib = env::var("CURL_SYS_LIB").unwrap();
+            let ld_search_path = env::var("CURL_SYS_LD_PATH").unwrap();
+            // http://doc.crates.io/build-script.html
+            println!("cargo:rustc-link-lib={}", linked_lib);
+            println!("cargo:rustc-link-search={}", ld_search_path);
+            return
+        },
+        Err(e) => {
+            panic!("Couldn't find libcurl from \
+                           pkgconfig ({:?}). It should!", e)
+        }
     }
 
     println!("cargo:rustc-link-search={}/lib", dst.display());
