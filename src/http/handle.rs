@@ -56,9 +56,11 @@ impl Handle {
         self
     }
 
-    pub fn dns_servers(mut self, servers: &str) -> Handle {
-        self.easy.setopt(opt::DNS_SERVERS, servers).unwrap();
-        self
+    pub fn dns_servers(mut self, servers: &str) -> Result<Handle, ErrCode> {
+        match self.easy.setopt(opt::DNS_SERVERS, servers) {
+            Ok(_) => Ok(self),
+            Err(e) => Err(e)
+        }
     }
 
     pub fn connect_timeout(mut self, ms: usize) -> Handle {
